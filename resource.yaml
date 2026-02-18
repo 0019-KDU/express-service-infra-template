@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: ${{ values.project_name }}-infra
+  description: Terraform infrastructure for ${{ values.project_name }}
+  annotations:
+    github.com/project-slug: ${{ values.owner }}/${{ values.project_name }}-infra
+spec:
+  type: infrastructure
+  lifecycle: production
+  owner: ${{ values.owner }}

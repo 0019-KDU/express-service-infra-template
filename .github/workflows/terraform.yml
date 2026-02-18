@@ -1,0 +1,37 @@
+name: Terraform Deploy
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [main]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::388370473778:role/github-terraform-role
+          aws-region: us-east-1
+
+      - name: Get Project Name
+        id: vars
+        run: echo "project_name=$(grep 'project_name' terraform.tfvars | cut -d'"' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=ec2/${{ steps.vars.outputs.project_name }}/terraform.tfstate"
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
